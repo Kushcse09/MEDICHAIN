@@ -1,584 +1,211 @@
 /**
- * Auto-generated contract configuration
- * Generated at: 2026-09-20T09:19:29.450Z
- * Network: localhost (Chain ID: 31337)
+ * MediChain Shield - Contract Configuration
+ *
+ * The contract address is driven by the NEXT_PUBLIC_CONTRACT_ADDRESS env var
+ * so it works on Vercel with the real deployed address, and falls back to the
+ * localhost Hardhat address for local dev.
+ *
+ * ABI matches AccessRegistry.sol compiled with Solidity 0.8.20.
+ * Updated to exactly match deployed contract interface.
  */
 
+// Runtime address: env var (Vercel/prod) → .env.local → zero-address (offline)
+function resolveAddress(): string {
+  if (typeof process !== "undefined" && process.env.NEXT_PUBLIC_CONTRACT_ADDRESS) {
+    const addr = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+    if (addr && addr !== "0xYourDeployedContractAddress" && addr.startsWith("0x")) {
+      return addr;
+    }
+  }
+  // Fallback: localhost Hardhat default (for local dev without env var)
+  return "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+}
+
+export const CONTRACT_ADDRESS = resolveAddress();
+export const CONTRACT_NETWORK = "Ethereum Sepolia Testnet";
+export const CONTRACT_CHAIN_ID = 11155111; // Ethereum Sepolia
+
 export const contracts = {
-  "AccessRegistry": {
-    "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-    "abi": [
+  AccessRegistry: {
+    address: CONTRACT_ADDRESS,
+    network: "sepolia",
+    chainId: "11155111",
+    abi: [
+      // Errors
+      { "type": "error", "name": "DuplicateGrant", "inputs": [] },
+      { "type": "error", "name": "EmptyRecordId", "inputs": [] },
+      { "type": "error", "name": "GrantExpired", "inputs": [] },
+      { "type": "error", "name": "GrantNotFound", "inputs": [] },
+      { "type": "error", "name": "GrantRevoked", "inputs": [] },
+      { "type": "error", "name": "InvalidExpiry", "inputs": [] },
+      { "type": "error", "name": "InvalidSignature", "inputs": [] },
+      { "type": "error", "name": "MaxExpiryExceeded", "inputs": [] },
+      { "type": "error", "name": "RecordNotFound", "inputs": [] },
+      { "type": "error", "name": "ReentrancyGuard", "inputs": [] },
+      { "type": "error", "name": "SignatureExpired", "inputs": [] },
+      { "type": "error", "name": "Unauthorized", "inputs": [] },
+      { "type": "error", "name": "ZeroAddress", "inputs": [] },
+      // Events
       {
-        "type": "error",
-        "name": "DuplicateGrant",
-        "inputs": []
-      },
-      {
-        "type": "error",
-        "name": "EmptyRecordId",
-        "inputs": []
-      },
-      {
-        "type": "error",
-        "name": "GrantExpired",
-        "inputs": []
-      },
-      {
-        "type": "error",
-        "name": "GrantNotFound",
-        "inputs": []
-      },
-      {
-        "type": "error",
-        "name": "GrantRevoked",
-        "inputs": []
-      },
-      {
-        "type": "error",
-        "name": "InvalidExpiry",
-        "inputs": []
-      },
-      {
-        "type": "error",
-        "name": "InvalidSignature",
-        "inputs": []
-      },
-      {
-        "type": "error",
-        "name": "MaxExpiryExceeded",
-        "inputs": []
-      },
-      {
-        "type": "error",
-        "name": "RecordNotFound",
-        "inputs": []
-      },
-      {
-        "type": "error",
-        "name": "ReentrancyGuard",
-        "inputs": []
-      },
-      {
-        "type": "error",
-        "name": "SignatureExpired",
-        "inputs": []
-      },
-      {
-        "type": "error",
-        "name": "Unauthorized",
-        "inputs": []
-      },
-      {
-        "type": "error",
-        "name": "ZeroAddress",
-        "inputs": []
-      },
-      {
-        "type": "event",
-        "anonymous": false,
-        "name": "AccessGranted",
+        "type": "event", "name": "PublicKeyPublished", "anonymous": false,
         "inputs": [
-          {
-            "type": "bytes32",
-            "name": "recordId",
-            "indexed": true
-          },
-          {
-            "type": "address",
-            "name": "owner",
-            "indexed": true
-          },
-          {
-            "type": "address",
-            "name": "grantee",
-            "indexed": true
-          },
-          {
-            "type": "uint256",
-            "name": "expiry",
-            "indexed": false
-          },
-          {
-            "type": "string",
-            "name": "wrappedKeyCid",
-            "indexed": false
-          },
-          {
-            "type": "uint256",
-            "name": "timestamp",
-            "indexed": false
-          }
+          { "name": "account", "type": "address", "indexed": true, "internalType": "address" },
+          { "name": "publicKey", "type": "bytes32", "indexed": false, "internalType": "bytes32" },
+          { "name": "timestamp", "type": "uint256", "indexed": false, "internalType": "uint256" }
         ]
       },
       {
-        "type": "event",
-        "anonymous": false,
-        "name": "AccessLogged",
+        "type": "event", "name": "RecordRegistered", "anonymous": false,
         "inputs": [
-          {
-            "type": "bytes32",
-            "name": "recordId",
-            "indexed": true
-          },
-          {
-            "type": "address",
-            "name": "accessor",
-            "indexed": true
-          },
-          {
-            "type": "uint256",
-            "name": "timestamp",
-            "indexed": false
-          }
+          { "name": "recordId", "type": "bytes32", "indexed": true, "internalType": "bytes32" },
+          { "name": "owner", "type": "address", "indexed": true, "internalType": "address" },
+          { "name": "timestamp", "type": "uint256", "indexed": false, "internalType": "uint256" }
         ]
       },
       {
-        "type": "event",
-        "anonymous": false,
-        "name": "AccessRevoked",
+        "type": "event", "name": "AccessGranted", "anonymous": false,
         "inputs": [
-          {
-            "type": "bytes32",
-            "name": "recordId",
-            "indexed": true
-          },
-          {
-            "type": "address",
-            "name": "owner",
-            "indexed": true
-          },
-          {
-            "type": "address",
-            "name": "grantee",
-            "indexed": true
-          },
-          {
-            "type": "uint256",
-            "name": "timestamp",
-            "indexed": false
-          }
+          { "name": "recordId", "type": "bytes32", "indexed": true, "internalType": "bytes32" },
+          { "name": "owner", "type": "address", "indexed": true, "internalType": "address" },
+          { "name": "grantee", "type": "address", "indexed": true, "internalType": "address" },
+          { "name": "expiry", "type": "uint256", "indexed": false, "internalType": "uint256" },
+          { "name": "wrappedKeyCid", "type": "string", "indexed": false, "internalType": "string" },
+          { "name": "timestamp", "type": "uint256", "indexed": false, "internalType": "uint256" }
         ]
       },
       {
-        "type": "event",
-        "anonymous": false,
-        "name": "PublicKeyPublished",
+        "type": "event", "name": "AccessRevoked", "anonymous": false,
         "inputs": [
-          {
-            "type": "address",
-            "name": "account",
-            "indexed": true
-          },
-          {
-            "type": "bytes32",
-            "name": "publicKey",
-            "indexed": false
-          },
-          {
-            "type": "uint256",
-            "name": "timestamp",
-            "indexed": false
-          }
+          { "name": "recordId", "type": "bytes32", "indexed": true, "internalType": "bytes32" },
+          { "name": "owner", "type": "address", "indexed": true, "internalType": "address" },
+          { "name": "grantee", "type": "address", "indexed": true, "internalType": "address" },
+          { "name": "timestamp", "type": "uint256", "indexed": false, "internalType": "uint256" }
         ]
       },
       {
-        "type": "event",
-        "anonymous": false,
-        "name": "RecordRegistered",
+        "type": "event", "name": "AccessLogged", "anonymous": false,
         "inputs": [
-          {
-            "type": "bytes32",
-            "name": "recordId",
-            "indexed": true
-          },
-          {
-            "type": "address",
-            "name": "owner",
-            "indexed": true
-          },
-          {
-            "type": "uint256",
-            "name": "timestamp",
-            "indexed": false
-          }
+          { "name": "recordId", "type": "bytes32", "indexed": true, "internalType": "bytes32" },
+          { "name": "accessor", "type": "address", "indexed": true, "internalType": "address" },
+          { "name": "timestamp", "type": "uint256", "indexed": false, "internalType": "uint256" }
+        ]
+      },
+      // State variable getters
+      {
+        "type": "function", "name": "publicKeys", "stateMutability": "view",
+        "inputs": [{ "name": "", "type": "address", "internalType": "address" }],
+        "outputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }]
+      },
+      {
+        "type": "function", "name": "records", "stateMutability": "view",
+        "inputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
+        "outputs": [
+          { "name": "owner", "type": "address", "internalType": "address" },
+          { "name": "exists", "type": "bool", "internalType": "bool" }
         ]
       },
       {
-        "type": "function",
-        "name": "DOMAIN_SEPARATOR",
-        "constant": true,
-        "stateMutability": "view",
-        "payable": false,
+        "type": "function", "name": "nonces", "stateMutability": "view",
+        "inputs": [{ "name": "", "type": "address", "internalType": "address" }],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }]
+      },
+      // Constants
+      {
+        "type": "function", "name": "MAX_GRANT_DURATION", "stateMutability": "view",
+        "inputs": [], "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }]
+      },
+      {
+        "type": "function", "name": "DOMAIN_TYPEHASH", "stateMutability": "view",
+        "inputs": [], "outputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }]
+      },
+      {
+        "type": "function", "name": "GRANT_PERMIT_TYPEHASH", "stateMutability": "view",
+        "inputs": [], "outputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }]
+      },
+      // Write functions
+      {
+        "type": "function", "name": "publishPublicKey", "stateMutability": "nonpayable",
+        "inputs": [{ "name": "x25519PublicKey", "type": "bytes32", "internalType": "bytes32" }],
+        "outputs": []
+      },
+      {
+        "type": "function", "name": "registerRecord", "stateMutability": "nonpayable",
+        "inputs": [{ "name": "recordId", "type": "bytes32", "internalType": "bytes32" }],
+        "outputs": []
+      },
+      {
+        "type": "function", "name": "grantAccess", "stateMutability": "nonpayable",
+        "inputs": [
+          { "name": "recordId", "type": "bytes32", "internalType": "bytes32" },
+          { "name": "grantee", "type": "address", "internalType": "address" },
+          { "name": "expiry", "type": "uint256", "internalType": "uint256" },
+          { "name": "wrappedKeyCid", "type": "string", "internalType": "string" }
+        ],
+        "outputs": []
+      },
+      {
+        "type": "function", "name": "grantAccessWithSig", "stateMutability": "nonpayable",
+        "inputs": [
+          { "name": "recordId", "type": "bytes32", "internalType": "bytes32" },
+          { "name": "grantee", "type": "address", "internalType": "address" },
+          { "name": "expiry", "type": "uint256", "internalType": "uint256" },
+          { "name": "wrappedKeyCid", "type": "string", "internalType": "string" },
+          { "name": "deadline", "type": "uint256", "internalType": "uint256" },
+          { "name": "v", "type": "uint8", "internalType": "uint8" },
+          { "name": "r", "type": "bytes32", "internalType": "bytes32" },
+          { "name": "s", "type": "bytes32", "internalType": "bytes32" }
+        ],
+        "outputs": []
+      },
+      {
+        "type": "function", "name": "revokeAccess", "stateMutability": "nonpayable",
+        "inputs": [
+          { "name": "recordId", "type": "bytes32", "internalType": "bytes32" },
+          { "name": "grantee", "type": "address", "internalType": "address" }
+        ],
+        "outputs": []
+      },
+      {
+        "type": "function", "name": "logAccess", "stateMutability": "nonpayable",
+        "inputs": [{ "name": "recordId", "type": "bytes32", "internalType": "bytes32" }],
+        "outputs": []
+      },
+      // View functions
+      {
+        "type": "function", "name": "isAuthorized", "stateMutability": "view",
+        "inputs": [
+          { "name": "recordId", "type": "bytes32", "internalType": "bytes32" },
+          { "name": "accessor", "type": "address", "internalType": "address" }
+        ],
+        "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }]
+      },
+      {
+        "type": "function", "name": "getGrant", "stateMutability": "view",
+        "inputs": [
+          { "name": "recordId", "type": "bytes32", "internalType": "bytes32" },
+          { "name": "grantee", "type": "address", "internalType": "address" }
+        ],
+        "outputs": [
+          { "name": "expiry", "type": "uint256", "internalType": "uint256" },
+          { "name": "revoked", "type": "bool", "internalType": "bool" },
+          { "name": "exists", "type": "bool", "internalType": "bool" }
+        ]
+      },
+      {
+        "type": "function", "name": "getWrappedKey", "stateMutability": "view",
+        "inputs": [
+          { "name": "recordId", "type": "bytes32", "internalType": "bytes32" },
+          { "name": "grantee", "type": "address", "internalType": "address" }
+        ],
+        "outputs": [{ "name": "", "type": "string", "internalType": "string" }]
+      },
+      {
+        "type": "function", "name": "DOMAIN_SEPARATOR", "stateMutability": "view",
         "inputs": [],
-        "outputs": [
-          {
-            "type": "bytes32",
-            "name": ""
-          }
-        ]
-      },
-      {
-        "type": "function",
-        "name": "DOMAIN_TYPEHASH",
-        "constant": true,
-        "stateMutability": "view",
-        "payable": false,
-        "inputs": [],
-        "outputs": [
-          {
-            "type": "bytes32",
-            "name": ""
-          }
-        ]
-      },
-      {
-        "type": "function",
-        "name": "GRANT_PERMIT_TYPEHASH",
-        "constant": true,
-        "stateMutability": "view",
-        "payable": false,
-        "inputs": [],
-        "outputs": [
-          {
-            "type": "bytes32",
-            "name": ""
-          }
-        ]
-      },
-      {
-        "type": "function",
-        "name": "MAX_GRANT_DURATION",
-        "constant": true,
-        "stateMutability": "view",
-        "payable": false,
-        "inputs": [],
-        "outputs": [
-          {
-            "type": "uint256",
-            "name": ""
-          }
-        ]
-      },
-      {
-        "type": "function",
-        "name": "getGrant",
-        "constant": true,
-        "stateMutability": "view",
-        "payable": false,
-        "inputs": [
-          {
-            "type": "bytes32",
-            "name": "recordId"
-          },
-          {
-            "type": "address",
-            "name": "grantee"
-          }
-        ],
-        "outputs": [
-          {
-            "type": "uint256",
-            "name": "expiry"
-          },
-          {
-            "type": "bool",
-            "name": "revoked"
-          },
-          {
-            "type": "bool",
-            "name": "exists"
-          }
-        ]
-      },
-      {
-        "type": "function",
-        "name": "getWrappedKey",
-        "constant": true,
-        "stateMutability": "view",
-        "payable": false,
-        "inputs": [
-          {
-            "type": "bytes32",
-            "name": "recordId"
-          },
-          {
-            "type": "address",
-            "name": "grantee"
-          }
-        ],
-        "outputs": [
-          {
-            "type": "string",
-            "name": ""
-          }
-        ]
-      },
-      {
-        "type": "function",
-        "name": "grantAccess",
-        "constant": false,
-        "payable": false,
-        "inputs": [
-          {
-            "type": "bytes32",
-            "name": "recordId"
-          },
-          {
-            "type": "address",
-            "name": "grantee"
-          },
-          {
-            "type": "uint256",
-            "name": "expiry"
-          },
-          {
-            "type": "string",
-            "name": "wrappedKeyCid"
-          }
-        ],
-        "outputs": []
-      },
-      {
-        "type": "function",
-        "name": "grantAccessWithSig",
-        "constant": false,
-        "payable": false,
-        "inputs": [
-          {
-            "type": "bytes32",
-            "name": "recordId"
-          },
-          {
-            "type": "address",
-            "name": "grantee"
-          },
-          {
-            "type": "uint256",
-            "name": "expiry"
-          },
-          {
-            "type": "string",
-            "name": "wrappedKeyCid"
-          },
-          {
-            "type": "uint256",
-            "name": "deadline"
-          },
-          {
-            "type": "uint8",
-            "name": "v"
-          },
-          {
-            "type": "bytes32",
-            "name": "r"
-          },
-          {
-            "type": "bytes32",
-            "name": "s"
-          }
-        ],
-        "outputs": []
-      },
-      {
-        "type": "function",
-        "name": "grants",
-        "constant": true,
-        "stateMutability": "view",
-        "payable": false,
-        "inputs": [
-          {
-            "type": "bytes32",
-            "name": ""
-          },
-          {
-            "type": "address",
-            "name": ""
-          }
-        ],
-        "outputs": [
-          {
-            "type": "uint64",
-            "name": "expiry"
-          },
-          {
-            "type": "bool",
-            "name": "revoked"
-          },
-          {
-            "type": "bool",
-            "name": "exists"
-          }
-        ]
-      },
-      {
-        "type": "function",
-        "name": "isAuthorized",
-        "constant": true,
-        "stateMutability": "view",
-        "payable": false,
-        "inputs": [
-          {
-            "type": "bytes32",
-            "name": "recordId"
-          },
-          {
-            "type": "address",
-            "name": "accessor"
-          }
-        ],
-        "outputs": [
-          {
-            "type": "bool",
-            "name": ""
-          }
-        ]
-      },
-      {
-        "type": "function",
-        "name": "logAccess",
-        "constant": false,
-        "payable": false,
-        "inputs": [
-          {
-            "type": "bytes32",
-            "name": "recordId"
-          }
-        ],
-        "outputs": []
-      },
-      {
-        "type": "function",
-        "name": "nonces",
-        "constant": true,
-        "stateMutability": "view",
-        "payable": false,
-        "inputs": [
-          {
-            "type": "address",
-            "name": ""
-          }
-        ],
-        "outputs": [
-          {
-            "type": "uint256",
-            "name": ""
-          }
-        ]
-      },
-      {
-        "type": "function",
-        "name": "publicKeys",
-        "constant": true,
-        "stateMutability": "view",
-        "payable": false,
-        "inputs": [
-          {
-            "type": "address",
-            "name": ""
-          }
-        ],
-        "outputs": [
-          {
-            "type": "bytes32",
-            "name": ""
-          }
-        ]
-      },
-      {
-        "type": "function",
-        "name": "publishPublicKey",
-        "constant": false,
-        "payable": false,
-        "inputs": [
-          {
-            "type": "bytes32",
-            "name": "x25519PublicKey"
-          }
-        ],
-        "outputs": []
-      },
-      {
-        "type": "function",
-        "name": "records",
-        "constant": true,
-        "stateMutability": "view",
-        "payable": false,
-        "inputs": [
-          {
-            "type": "bytes32",
-            "name": ""
-          }
-        ],
-        "outputs": [
-          {
-            "type": "address",
-            "name": "owner"
-          },
-          {
-            "type": "bool",
-            "name": "exists"
-          }
-        ]
-      },
-      {
-        "type": "function",
-        "name": "registerRecord",
-        "constant": false,
-        "payable": false,
-        "inputs": [
-          {
-            "type": "bytes32",
-            "name": "recordId"
-          }
-        ],
-        "outputs": []
-      },
-      {
-        "type": "function",
-        "name": "revokeAccess",
-        "constant": false,
-        "payable": false,
-        "inputs": [
-          {
-            "type": "bytes32",
-            "name": "recordId"
-          },
-          {
-            "type": "address",
-            "name": "grantee"
-          }
-        ],
-        "outputs": []
-      },
-      {
-        "type": "function",
-        "name": "wrappedKeys",
-        "constant": true,
-        "stateMutability": "view",
-        "payable": false,
-        "inputs": [
-          {
-            "type": "bytes32",
-            "name": ""
-          },
-          {
-            "type": "address",
-            "name": ""
-          }
-        ],
-        "outputs": [
-          {
-            "type": "string",
-            "name": ""
-          }
-        ]
+        "outputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }]
       }
     ],
-    "deployedAt": "2026-09-20T09:19:29.444Z",
-    "network": "localhost",
-    "chainId": "31337",
-    "deployer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
-  }
+  },
 } as const;
 
 export type ContractConfig = typeof contracts;

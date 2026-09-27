@@ -84,7 +84,7 @@ class GeminiProvider extends LLMProvider {
 
     if (!apiKey) {
       console.warn(
-        "⚠️  Gemini API key not provided. Set GEMINI_API_KEY in .env"
+        "[WARN] Gemini API key not provided. Set GEMINI_API_KEY in .env"
       );
     }
   }
@@ -160,7 +160,7 @@ class GroqProvider extends LLMProvider {
     this.available = !!apiKey;
 
     if (!apiKey) {
-      console.warn("⚠️  Groq API key not provided. Set GROQ_API_KEY in .env");
+      console.warn("[WARN] Groq API key not provided. Set GROQ_API_KEY in .env");
     }
   }
 
@@ -391,7 +391,7 @@ class LLMAdapter {
       .filter((p) => p.isAvailable())
       .map((p) => p.name);
 
-    console.log(`✅ LLM Adapter initialized with providers: ${availableProviders.join(", ")}`);
+    console.log(`LLM Adapter initialized with providers: ${availableProviders.join(", ")}`);
   }
 
   /**
@@ -401,7 +401,7 @@ class LLMAdapter {
     // Check cache first
     const cached = this.cache.get(systemPrompt, userPrompt);
     if (cached) {
-      console.log("📦 Cache hit");
+      console.log("Cache hit");
       return { ...cached, cached: true };
     }
 
@@ -412,18 +412,18 @@ class LLMAdapter {
       }
 
       try {
-        console.log(`🤖 Attempting ${provider.name}...`);
+        console.log(`Attempting ${provider.name}...`);
         const response = await provider.complete(systemPrompt, userPrompt);
 
         // Cache successful response
         this.cache.set(systemPrompt, userPrompt, response);
 
         console.log(
-          `✅ ${provider.name} success (${response.tokensUsed} tokens)`
+          `${provider.name} success (${response.tokensUsed} tokens)`
         );
         return { ...response, cached: false };
       } catch (error) {
-        console.warn(`⚠️  ${provider.name} failed:`, error.message);
+        console.warn(`[WARN] ${provider.name} failed:`, error.message);
         // Continue to next provider
       }
     }

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * MediChain Shield - Audit Service
  * 
  * Queries on-chain events from AccessRegistry to build audit trails:
@@ -36,7 +36,7 @@ class ShieldAuditService {
         this.provider
       );
     } else {
-      console.warn("⚠️  Audit service: Contract not configured");
+      console.warn("[WARN] Audit service: Contract not configured");
     }
   }
 
@@ -59,11 +59,11 @@ class ShieldAuditService {
           this.provider
         );
         console.log(
-          `✅ Audit service connected to AccessRegistry at ${config.AccessRegistry.address}`
+          `Audit service connected to AccessRegistry at ${config.AccessRegistry.address}`
         );
       }
     } catch (error) {
-      console.error("❌ Failed to load contract config:", error.message);
+      console.error("Failed to load contract config:", error.message);
     }
   }
 

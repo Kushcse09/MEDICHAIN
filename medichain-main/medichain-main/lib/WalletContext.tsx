@@ -53,11 +53,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         setAddress(connectedAddress);
         setIsConnected(true);
         
-        // Switch to Polygon Amoy testnet
+        // Switch to Ethereum Sepolia testnet
         try {
           await walletService.switchToPolygonAmoy();
         } catch (networkError) {
-          console.warn('Could not switch to Polygon Amoy:', networkError);
+          console.warn('Could not switch to Sepolia:', networkError);
         }
       }
     } catch (err: any) {

@@ -9,23 +9,17 @@
 
 const { expect } = require("chai");
 const { describe, it } = require("mocha");
+const { randomFillSync } = require("crypto");
 
 describe("Attack Demo: Stolen CID", function () {
   let crypto;
 
   before(async function () {
-    // Import crypto modules
-    const aesModule = await import("../../server/../../../medichain-main/medichain-main/lib/crypto/aesGcm.ts");
-    const keyWrapModule = await import("../../server/../../../medichain-main/medichain-main/lib/crypto/keyWrap.ts");
-    const keyDerivModule = await import("../../server/../../../medichain-main/medichain-main/lib/crypto/keyDerivation.ts");
+    // Path from medichain-backend/test/attacks/ → ../../server/services/
+    const { encryptRecord, decryptRecord } = await import("../../server/services/crypto-compat.js");
+    const { wrapKey, unwrapKey } = await import("../../server/services/key-wrap-compat.js");
     
-    crypto = {
-      encryptRecord: aesModule.encryptRecord,
-      decryptRecord: aesModule.decryptRecord,
-      wrapKey: keyWrapModule.wrapKey,
-      unwrapKey: keyWrapModule.unwrapKey,
-      deriveX25519KeyPair: keyDerivModule.deriveX25519KeyPair,
-    };
+    crypto = { encryptRecord, decryptRecord, wrapKey, unwrapKey };
   });
 
   it("❌ ATTACK FAILS: Cannot decrypt with stolen CID alone", async function () {
@@ -58,8 +52,8 @@ describe("Attack Demo: Stolen CID", function () {
     
     try {
       // Attacker tries with wrong key
-      const attackerKey = new Uint8Array(32); // Wrong key
-      crypto.getRandomValues(attackerKey);
+      const attackerKey = new Uint8Array(32);
+      randomFillSync(attackerKey); // random wrong key
       
       await crypto.decryptRecord(
         stolenCiphertext,

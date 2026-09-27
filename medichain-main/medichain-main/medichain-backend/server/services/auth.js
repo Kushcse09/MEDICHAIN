@@ -20,7 +20,9 @@ export function verifySignatureAndIssueToken(address, signature) {
   const nonce = nonces.get(key);
   if (!nonce) throw new Error("No nonce issued for this address — request one first");
 
-  const recovered = ethers.verifyMessage(nonce, signature);
+  // Reconstruct the exact message the frontend signs (see lib/wallet.ts)
+  const message = `MediChain Login Request\n\nNonce: ${nonce}\n\nSigning this message proves you own this wallet address and allows you to access your medical records.`;
+  const recovered = ethers.verifyMessage(message, signature);
   if (recovered.toLowerCase() !== key) {
     throw new Error("Signature does not match address");
   }

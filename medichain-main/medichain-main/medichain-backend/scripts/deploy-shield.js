@@ -1,4 +1,4 @@
-/**
+﻿/**
  * MediChain Shield - AccessRegistry Deployment Script
  * 
  * Deploys the AccessRegistry contract and automatically generates
@@ -14,7 +14,7 @@ const path = require("path");
 const { ethers } = require("hardhat");
 
 async function main() {
-  console.log("\n🛡️  MediChain Shield Deployment\n");
+  console.log("\nMediChain Shield Deployment\n");
 
   // Get deployer account
   const [deployer] = await ethers.getSigners();
@@ -32,13 +32,13 @@ async function main() {
   await accessRegistry.waitForDeployment();
 
   const contractAddress = await accessRegistry.getAddress();
-  console.log("✅ AccessRegistry deployed to:", contractAddress);
+  console.log("AccessRegistry deployed to:", contractAddress);
 
   // Wait for block confirmations on testnets
   if (network.chainId !== 31337n) {
     console.log("Waiting for block confirmations...");
     await accessRegistry.deploymentTransaction().wait(3);
-    console.log("✅ Confirmed");
+    console.log("Confirmed");
   }
 
   // Get contract ABI
@@ -73,12 +73,12 @@ async function main() {
   // Write backend config
   const backendConfigPath = path.join(backendConfigDir, "contracts.json");
   fs.writeFileSync(backendConfigPath, JSON.stringify(config, null, 2));
-  console.log("\n✅ Backend config written to:", backendConfigPath);
+  console.log("\nBackend config written to:", backendConfigPath);
 
   // Write frontend config
   const frontendConfigPath = path.join(frontendConfigDir, "contracts.json");
   fs.writeFileSync(frontendConfigPath, JSON.stringify(config, null, 2));
-  console.log("✅ Frontend config written to:", frontendConfigPath);
+  console.log("Frontend config written to:", frontendConfigPath);
 
   // Also create a TypeScript version for frontend
   const tsConfig = `/**
@@ -94,10 +94,10 @@ export type ContractConfig = typeof contracts;
 
   const frontendTsConfigPath = path.join(frontendConfigDir, "contracts.ts");
   fs.writeFileSync(frontendTsConfigPath, tsConfig);
-  console.log("✅ Frontend TypeScript config written to:", frontendTsConfigPath);
+  console.log("Frontend TypeScript config written to:", frontendTsConfigPath);
 
   // Print summary
-  console.log("\n📋 Deployment Summary:");
+  console.log("\nDeployment Summary:");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log("Contract:      AccessRegistry");
   console.log("Address:       ", contractAddress);
@@ -108,11 +108,11 @@ export type ContractConfig = typeof contracts;
 
   // Print contract constants
   const maxGrantDuration = await accessRegistry.MAX_GRANT_DURATION();
-  console.log("\n⚙️  Contract Constants:");
+  console.log("\nContract Constants:");
   console.log("Max Grant Duration:", Number(maxGrantDuration) / 86400, "days");
 
   // Print next steps
-  console.log("\n🎯 Next Steps:");
+  console.log("\nNext Steps:");
   console.log("1. Backend: Contract config available at server/config/contracts.json");
   console.log("2. Frontend: Contract config available at lib/config/contracts.ts");
   console.log("3. Update .env files with RPC URL if deploying to testnet");
@@ -125,7 +125,7 @@ export type ContractConfig = typeof contracts;
 main()
   .then(() => process.exit(0))
   .catch((error) => {
-    console.error("\n❌ Deployment failed:");
+    console.error("\nDeployment failed:");
     console.error(error);
     process.exit(1);
   });

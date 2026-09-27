@@ -44,7 +44,7 @@ class IPFSKuboAdapter extends StorageAdapter {
       this.client = createIPFSClient({ url });
       this.available = true;
     } catch (error) {
-      console.warn("⚠️  IPFS Kubo adapter initialization failed:", error.message);
+      console.warn("[WARN] IPFS Kubo adapter initialization failed:", error.message);
       this.available = false;
     }
   }
@@ -212,7 +212,7 @@ class ShieldStorage {
       this.fallback = null;
     }
 
-    console.log(`✅ Shield Storage initialized (primary: ${primaryAdapter})`);
+    console.log(`Shield Storage initialized (primary: ${primaryAdapter})`);
   }
 
   /**
@@ -260,20 +260,20 @@ class ShieldStorage {
       // Try primary adapter
       if (this.primary.available) {
         const cid = await this.primary.store(buffer);
-        console.log(`📦 Stored ciphertext: ${cid} (${buffer.length} bytes)`);
+        console.log(`Stored ciphertext: ${cid} (${buffer.length} bytes)`);
         return cid;
       }
 
       // Fall back to secondary
       if (this.fallback && this.fallback.available) {
         const cid = await this.fallback.store(buffer);
-        console.warn(`⚠️  Used fallback storage: ${cid}`);
+        console.warn(`[WARN] Used fallback storage: ${cid}`);
         return cid;
       }
 
       throw new Error("No storage adapter available");
     } catch (error) {
-      console.error("❌ Storage failed:", error.message);
+      console.error("Storage failed:", error.message);
       throw error;
     }
   }
@@ -297,7 +297,7 @@ class ShieldStorage {
 
       throw new Error("No storage adapter available");
     } catch (error) {
-      console.error(`❌ Retrieval failed for ${cid}:`, error.message);
+      console.error(`Retrieval failed for ${cid}:`, error.message);
       throw error;
     }
   }
@@ -314,7 +314,7 @@ class ShieldStorage {
       }
       return false;
     } catch (error) {
-      console.error(`❌ Pinning failed for ${cid}:`, error.message);
+      console.error(`Pinning failed for ${cid}:`, error.message);
       return false;
     }
   }

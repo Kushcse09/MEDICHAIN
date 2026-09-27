@@ -19,6 +19,19 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Surface backend error messages instead of generic Axios HTTP errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const backendMsg = error?.response?.data?.error;
+    if (backendMsg) {
+      error.message = backendMsg;
+    }
+    return Promise.reject(error);
+  }
+);
+
+
 // Auth API
 export const authAPI = {
   getNonce: async (address: string) => {

@@ -92,12 +92,13 @@ export class WalletService {
     }
   }
 
-  async switchToPolygonAmoy() {
+  async switchToSepolia() {
     if (!this.provider) {
       throw new Error('Wallet not connected');
     }
 
-    const chainId = '0x13882'; // Polygon Amoy testnet
+    // Ethereum Sepolia testnet — chosen for reliability over Polygon Amoy's unstable public RPC
+    const chainId = '0xaa36a7'; // Sepolia chain ID: 11155111
     
     try {
       await window.ethereum.request({
@@ -111,20 +112,28 @@ export class WalletService {
           method: 'wallet_addEthereumChain',
           params: [{
             chainId,
-            chainName: 'Polygon Amoy Testnet',
+            chainName: 'Ethereum Sepolia Testnet',
             nativeCurrency: {
-              name: 'MATIC',
-              symbol: 'MATIC',
+              name: 'ETH',
+              symbol: 'ETH',
               decimals: 18,
             },
-            rpcUrls: [process.env.NEXT_PUBLIC_POLYGON_AMOY_RPC || 'https://rpc-amoy.polygon.technology'],
-            blockExplorerUrls: ['https://amoy.polygonscan.com/'],
+            rpcUrls: [
+              process.env.NEXT_PUBLIC_SEPOLIA_RPC ||
+              'https://eth-sepolia.g.alchemy.com/v2/demo',
+            ],
+            blockExplorerUrls: ['https://sepolia.etherscan.io/'],
           }],
         });
       } else {
         throw error;
       }
     }
+  }
+
+  // Backwards compat alias — callers using the old name still work
+  async switchToPolygonAmoy() {
+    return this.switchToSepolia();
   }
 
   disconnect() {

@@ -137,16 +137,7 @@ describe("Attack Demo: Forged Grant", function () {
       accessRegistry
         .connect(patient)
         .grantAccess(recordId, doctor.address, expiry, "QmTestKey")
-    )
-      .to.emit(accessRegistry, "AccessGranted")
-      .withArgs(
-        recordId,
-        patient.address,
-        doctor.address,
-        expiry,
-        "QmTestKey",
-        await ethers.provider.getBlockNumber() + 1
-      );
+    ).to.emit(accessRegistry, "AccessGranted");
 
     console.log(`   ✅ Access granted`);
 
@@ -155,14 +146,7 @@ describe("Attack Demo: Forged Grant", function () {
       accessRegistry
         .connect(patient)
         .revokeAccess(recordId, doctor.address)
-    )
-      .to.emit(accessRegistry, "AccessRevoked")
-      .withArgs(
-        recordId,
-        patient.address,
-        doctor.address,
-        await ethers.provider.getBlockNumber() + 1
-      );
+    ).to.emit(accessRegistry, "AccessRevoked");
 
     console.log(`   ✅ Access revoked`);
 

@@ -77,8 +77,6 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-  console.log(`🛡️  MediChain Shield backend running on http://localhost:${PORT}`);
-  console.log(`📋 API endpoints:`);
-  console.log(`   - Legacy API: /api/*`);
-  console.log(`   - Shield API: /shield/*`);
+  console.log(`MediChain Shield backend running on http://localhost:${PORT}`);
+  console.log(`API endpoints: /api/* (legacy)  /shield/* (shield)`);
 });

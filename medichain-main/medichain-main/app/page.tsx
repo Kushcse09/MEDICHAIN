@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ArrowRight, Check, Shield, Lock, FileText, Fingerprint, Wallet, Zap } from 'lucide-react'
 import { useWallet } from '@/lib/WalletContext'
 import { useRouter } from 'next/navigation'
@@ -10,11 +10,14 @@ export default function Page() {
   const router = useRouter()
   const [showConnectModal, setShowConnectModal] = useState(false)
 
-  // Redirect to dashboard if already connected
-  if (isConnected) {
-    router.push('/dashboard')
-    return null
-  }
+  // Redirect to dashboard if already connected (useEffect avoids render-time setState violation)
+  useEffect(() => {
+    if (isConnected) {
+      router.push('/dashboard')
+    }
+  }, [isConnected, router])
+
+  if (isConnected) return null
 
   const handleGetStarted = () => {
     setShowConnectModal(true)
@@ -83,7 +86,7 @@ export default function Page() {
             </a>
           </div>
           <p className="mt-6 text-xs text-[#8a968e]">
-            Powered by Polygon • Secured by IPFS • AI-Enhanced
+            Powered by Ethereum • Secured by IPFS • AI-Enhanced
           </p>
         </div>
       </section>
@@ -115,7 +118,7 @@ export default function Page() {
               </div>
               <h3 className="mt-6 text-xl font-semibold">Blockchain Verified</h3>
               <p className="mt-3 text-sm leading-6 text-[#66746b]">
-                Record hashes anchored on Polygon blockchain provide tamper-proof verification and complete audit trails.
+                Record hashes anchored on Ethereum Sepolia blockchain provide tamper-proof verification and complete audit trails.
               </p>
             </div>
             <div className="rounded-lg border border-[#dfe5df] bg-[#faf8f5] p-8">
@@ -204,7 +207,7 @@ export default function Page() {
                 <li className="flex items-start gap-3">
                   <Check className="mt-0.5 size-5 shrink-0 text-[#3f7b58]" />
                   <span className="text-sm text-[#66746b]">
-                    <strong className="text-[#1f3d2e]">Blockchain audit trail</strong> — Immutable access logs on Polygon
+                    <strong className="text-[#1f3d2e]">Blockchain audit trail</strong> — Immutable access logs on Ethereum Sepolia
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
@@ -263,7 +266,7 @@ export default function Page() {
             Get Started Now
           </button>
           <p className="mt-6 text-xs text-[#8a968e]">
-            Free to use • Polygon Amoy Testnet • Demo Version
+            Free to use • Ethereum Sepolia Testnet • Demo Version
           </p>
         </div>
       </section>
@@ -279,7 +282,7 @@ export default function Page() {
               <span className="font-semibold">MediChain</span>
             </div>
             <div className="text-sm text-white/70">
-              Powered by Polygon, IPFS & AI
+              Powered by Ethereum Sepolia, IPFS & AI
             </div>
           </div>
         </div>

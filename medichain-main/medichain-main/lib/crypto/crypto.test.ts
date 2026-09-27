@@ -53,7 +53,7 @@ import {
 } from './index';
 
 // Test fixtures
-const TEST_CHAIN_ID = 80002; // Polygon Amoy
+const TEST_CHAIN_ID = 11155111; // Ethereum Sepolia
 const TEST_ADDRESS = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb';
 const TEST_SIGNATURE =
   '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12';

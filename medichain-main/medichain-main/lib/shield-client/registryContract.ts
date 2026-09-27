@@ -42,7 +42,7 @@ export class AccessRegistryClient {
    * Publish public key
    */
   async publishPublicKey(
-    publicKey: string,
+    publicKey: string | Uint8Array,
     onStateChange?: (state: TransactionState) => void
   ): Promise<TransactionState> {
     if (!this.signer) {
@@ -322,12 +322,9 @@ export class AccessRegistryClient {
     revoked: boolean;
     exists: boolean;
   }> {
-    const grant = await this.contract.getGrant(recordId, grantee);
-    return {
-      expiry: grant.expiry,
-      revoked: grant.revoked,
-      exists: grant.exists,
-    };
+    // Returns (uint256 expiry, bool revoked, bool exists)
+    const [expiry, revoked, exists] = await this.contract.getGrant(recordId, grantee);
+    return { expiry, revoked, exists };
   }
 
   /**

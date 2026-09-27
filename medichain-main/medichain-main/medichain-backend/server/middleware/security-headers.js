@@ -1,4 +1,4 @@
-/**
+﻿/**
  * MediChain Shield - Security Headers Middleware
  * 
  * Implements defense-in-depth HTTP security headers:
@@ -79,7 +79,7 @@ function configureCORS() {
       // In development, allow all origins (with warning)
       res.setHeader("Access-Control-Allow-Origin", origin || "*");
       if (origin && !allowedOrigins.includes(origin)) {
-        console.warn(`⚠️  CORS: Origin ${origin} not in allowed list (dev mode)`);
+        console.warn(`[WARN] CORS: Origin ${origin} not in allowed list (dev mode)`);
       }
     } else {
       // Production: reject unauthorized origins

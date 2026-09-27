@@ -1,572 +1,260 @@
-# 🏥 MediChain - Blockchain Medical Records with Zero-Knowledge Encryption
+# MediChain Shield
 
-> **Patient-owned, blockchain-verified medical records with enterprise-grade security**
+> **Patient-owned medical records secured by zero-knowledge encryption, IPFS, and Ethereum blockchain.**
 
-Complete Web3 healthcare platform with **MediChain Shield** - zero-cost, privacy-first security layer featuring client-side encryption, smart contract access control, AI guard, and proven attack resistance.
+A Web3 hackathon submission. Frontend on Vercel · Smart contract on Ethereum Sepolia · Express backend on Railway.
 
----
-
-## 🎯 Overview
-
-MediChain is a decentralized medical record management system that puts patients in complete control of their healthcare data. Using blockchain technology, IPFS storage, and Web3 wallet authentication, patients can securely store, share, and revoke access to their medical records.
-
-### 🛡️ MediChain Shield Security Layer
-
-**NEW**: Enterprise-grade security without modifying a single UI component:
-
-- ✅ **Client-Side Encryption** - AES-256-GCM with HKDF key derivation
-- ✅ **Zero-Knowledge Architecture** - Server never sees plaintext or private keys
-- ✅ **Time-Bounded Access** - Automatic grant expiration (max 90 days)
-- ✅ **EIP-712 Signatures** - Replay attack protection with nonce tracking
-- ✅ **AI Prompt Injection Defense** - 3-layer protection, zero LLM tokens on attacks
-- ✅ **Multi-Tier Rate Limiting** - IP, wallet, and endpoint-specific limits
-- ✅ **Immutable Audit Trail** - On-chain access logging
-- ✅ **Attack-Tested** - 5/5 attack scenarios blocked (see demos)
-
-**Cost**: $0 (free-tier LLMs, local IPFS, testnet gas)
+> Deployed to **Ethereum Sepolia** for testnet reliability — Polygon Amoy's public RPC was producing frequent timeouts during development.
 
 ---
 
-## 🚀 Quick Start
+## Problem
+
+Medical records are controlled by hospitals and insurers — patients can't take them between providers without faxes, phone calls, or PDF exports. When breaches happen (133M US records exposed in 2023 alone), the data is there, unencrypted, on a server you didn't choose.
+
+## Solution
+
+MediChain Shield gives patients a cryptographic identity tied to their Ethereum wallet. Records are encrypted *in the browser* before upload. The server stores only ciphertext. Smart contracts on Ethereum enforce time-bounded, revocable access grants — no phone calls, no faxes, no data locked in a hospital silo.
+
+**The server can be fully compromised and your medical data remains safe.** That's the zero-knowledge guarantee.
+
+---
+
+## Deployed Contract
+
+| Field | Value |
+|---|---|
+| Contract | `AccessRegistry.sol` |
+| Network | Ethereum Sepolia Testnet (Chain ID: 11155111) |
+| Address | *(deploy required — see Step 1 below)* |
+| Explorer | [sepolia.etherscan.io/address/...](https://sepolia.etherscan.io) |
+
+---
+
+## Security Architecture
+
+```
+Wallet Signature (EIP-191)
+         │
+         ▼
+    HKDF-SHA256    →  X25519 Keypair  (memory only, never persisted)
+                              │
+              ┌───────────────┴───────────────┐
+              │                               │
+        AES-256-GCM                    crypto_box_seal
+        (encrypt file)             (wrap key for grantee)
+              │                               │
+        ciphertext → IPFS            wrapped key → backend
+              │                               │
+        CID → Sepolia              expiry enforced by
+              hash                  AccessRegistry.sol
+```
+
+**Properties:**
+- **Zero-knowledge**: server sees only encrypted bytes + metadata
+- **Authenticated encryption**: AES-GCM with record-ID-bound AAD prevents ciphertext transplant
+- **Forward-secret sharing**: ephemeral X25519 sealed box per grantee
+- **On-chain enforcement**: grants expire, can be revoked; immutable audit events
+- **EIP-712 signature grants**: gasless delegation with nonce-based replay protection
+
+---
+
+## Tech Stack
+
+| Layer | Technologies |
+|---|---|
+| Frontend | Next.js 16.3.3 (App Router) · React 19 · TypeScript 5.7 · Tailwind CSS v4 |
+| Cryptography | AES-256-GCM (WebCrypto API) · X25519 (libsodium-wrappers) · HKDF-SHA256 |
+| Web3 | ethers.js v6 · EIP-191 signing · EIP-712 permits |
+| Backend | Express 4 · Node.js ESM · JWT auth · Helmet · Zod |
+| Blockchain | Solidity ^0.8.20 · Hardhat · **Ethereum Sepolia testnet** |
+| Storage | IPFS via web3.storage (real) or in-memory mock (demo/Vercel) |
+| Deployment | Vercel (frontend) · Railway/Render (backend) |
+
+---
+
+## Local Development
 
 ### Prerequisites
 
-- Node.js v18+
+- Node.js 18+
+- pnpm (`npm install -g pnpm`)
 - MetaMask browser extension
-- pnpm (frontend) and npm (backend)
+- Sepolia ETH for on-chain features (free from faucet below)
 
-### 1. Install Dependencies
+### Step 1: Deploy the contract
+
+You need a wallet with Sepolia ETH. Get it free:
+
+1. **Get Sepolia ETH** from [Alchemy Sepolia Faucet](https://sepoliafaucet.com/) or [Chainlink Faucet](https://faucets.chain.link/sepolia)
+   - Use a **fresh/burner wallet** — not your main wallet
+   - Fund the wallet address shown in MetaMask
+2. Get a free Alchemy API key at [alchemy.com](https://www.alchemy.com/) — create an app targeting **Ethereum Sepolia**
+3. Export your deployer wallet private key from MetaMask
+4. Create `medichain-backend/.env`:
 
 ```bash
-# Frontend
-cd medichain-main/medichain-main
-pnpm install
-
-# Backend
-cd ../../medichain-backend
-npm install
-cd server
-npm install
+DEPLOYER_PRIVATE_KEY=0xYourPrivateKeyHere
+ALCHEMY_API_KEY=YourAlchemyKeyHere
+ETHERSCAN_API_KEY=YourEtherscanKeyHere   # optional, for verification
 ```
 
-### 2. Start Local Blockchain (for Shield features)
+5. Compile and deploy:
 
 ```bash
 cd medichain-backend
-npx hardhat node
+npm install
+npx hardhat compile
+npx hardhat run scripts/deploy-shield.js --network sepolia
 ```
 
-### 3. Deploy Contracts
+6. Copy the deployed address into `.env.local`:
 
 ```bash
-npm run deploy:local
-# Auto-generates config files for frontend & backend
+NEXT_PUBLIC_CONTRACT_ADDRESS=0xYourDeployedAddress
 ```
 
-### 4. Configure Environment
-
-**Backend** (`medichain-backend/server/.env`):
-```env
-PORT=4000
-JWT_SECRET=your-secret-key-here
-POLYGON_AMOY_RPC_URL=http://localhost:8545
-CONTRACT_ADDRESS=<from-deployment>
-SHIELD_REGISTRY_ADDRESS=<from-deployment>
+Also update `medichain-backend/server/.env`:
+```bash
+CONTRACT_ADDRESS=0xYourDeployedAddress
 ```
 
-**Frontend** (`medichain-main/medichain-main/.env.local`):
+7. (Optional) Verify on Etherscan:
+
+```bash
+npx hardhat verify --network sepolia 0xYourDeployedAddress
+```
+
+8. Update this README with the real address + Etherscan link.
+
+### Step 2: Configure environment
+
+**Frontend** (`.env.local`):
+
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:4000
-NEXT_PUBLIC_CONTRACT_ADDRESS=<from-deployment>
-NEXT_PUBLIC_SHIELD_REGISTRY_ADDRESS=<from-deployment>
+NEXT_PUBLIC_CONTRACT_ADDRESS=0xYourDeployedAddress
+NEXT_PUBLIC_SEPOLIA_RPC=https://eth-sepolia.g.alchemy.com/v2/YOUR_ALCHEMY_KEY
 ```
 
-### 5. Start Servers
+**Backend** (`medichain-backend/server/.env`):
 
-**Windows PowerShell**:
-```bash
-.\start-dev.ps1
+```env
+PORT=4000
+JWT_SECRET=change-this-in-production-use-long-random-string
+CONTRACT_ADDRESS=0xYourDeployedAddress
+BACKEND_SIGNER_PRIVATE_KEY=   # optional: relayer for gasless demo
+WEB3_STORAGE_TOKEN=           # optional: real IPFS (blank = in-memory mock)
+ANTHROPIC_API_KEY=            # optional: AI drug interaction checks
 ```
 
-**Manual**:
+### Step 3: Run both services
+
 ```bash
-# Terminal 1 - Backend
+# Start backend (Terminal 1)
 cd medichain-backend/server
-npm run dev
+npm run dev      # nodemon on :4000
 
-# Terminal 2 - Frontend
-cd medichain-main/medichain-main
-pnpm dev
+# Start frontend (Terminal 2)
+pnpm dev         # Next.js on :3000
 ```
 
-### 6. Open Application
-
-Navigate to **http://localhost:3000** and connect MetaMask!
+Open http://localhost:3000 and connect MetaMask.
 
 ---
 
-## 🧪 Verify Installation
+## Vercel Deployment
 
-### Run All Tests
+Set these environment variables in the Vercel dashboard:
+
+| Variable | Value |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | Your Railway backend URL |
+| `NEXT_PUBLIC_CONTRACT_ADDRESS` | Deployed `AccessRegistry` address |
+| `NEXT_PUBLIC_SEPOLIA_RPC` | `https://eth-sepolia.g.alchemy.com/v2/YOUR_KEY` |
+
+---
+
+## Running Tests
 
 ```bash
-# Frontend crypto tests (36 tests)
-cd medichain-main/medichain-main
-pnpm test
+# Frontend crypto unit tests
+pnpm test:run
+# → 36/36 passing
 
-# Backend contract tests (38 tests)
-cd ../../medichain-backend
-npm test
-
-# AI Guard tests (40+ tests)
-npm test test/ai-guard.test.js
-
-# Attack demonstrations (5 scenarios, all blocked)
-npm run attack:all
-```
-
-**Expected**: 131+ tests passing, all attacks blocked ✅
-
----
-
-## 📖 Documentation
-
-### Essential Docs
-
-1. **[MEDICHAIN-SHIELD-COMPLETE.md](MEDICHAIN-SHIELD-COMPLETE.md)** ⭐ - Complete Shield implementation guide
-   - All 6 phases overview
-   - Architecture and security guarantees
-   - File structure and API reference
-   - Quick start and verification steps
-
-2. **[INTEGRATION.md](INTEGRATION.md)** - Frontend integration guide
-   - Complete TypeScript examples
-   - Hook usage patterns (useShieldKeys, useShieldGrants, useShieldAudit, useShieldAI)
-   - Encryption workflow walkthrough
-   - Error handling and best practices
-
-3. **[RUN-DEMOS.md](RUN-DEMOS.md)** - Attack demonstration guide
-   - How to run each of 5 attack scenarios
-   - Expected console output
-   - What each demo validates
-   - Demo script for presentations
-
----
-
-## 🎬 Attack Demonstrations
-
-**Prove the security works:**
-
-```bash
+# Smart contract + AI guard tests
 cd medichain-backend
+npx hardhat test
+# → 99/99 passing (38 contract + 44 AI guard + 17 attack demos)
 
-# Run all 5 attack demos
-npm run attack:all
-
-# Or run individually:
-npm run attack:stolen-cid      # Stolen CID cannot decrypt
-npm run attack:expired-grant   # Time-bounded access enforced
-npm run attack:replay          # EIP-712 replay blocked
-npm run attack:forged-grant    # Only owner can grant access
-npm run attack:injection       # Prompt injection quarantined
-```
-
-**Expected**: All attacks BLOCKED with detailed console output ✅
-
-See **[RUN-DEMOS.md](RUN-DEMOS.md)** for detailed guide.
-
----
-
-## 📁 Project Structure
-
-```
-Medichain/
-├── medichain-backend/
-│   ├── contracts/
-│   │   ├── AccessControl.sol        # Original access control
-│   │   └── AccessRegistry.sol       # NEW: Shield registry (EIP-712)
-│   │
-│   ├── server/
-│   │   ├── middleware/              # NEW: Security middleware
-│   │   │   ├── validate.js          # Zod validation + size limits
-│   │   │   ├── security-headers.js  # Helmet + CORS + request ID
-│   │   │   └── rate-limit.js        # Multi-tier rate limiting
-│   │   │
-│   │   ├── services/                # NEW: Shield services
-│   │   │   ├── shield-storage.js    # IPFS/memory/fs adapters
-│   │   │   ├── shield-audit.js      # Event querying
-│   │   │   ├── shield-auth.js       # Wallet authentication
-│   │   │   ├── ai-guard.js          # 3-layer injection defense
-│   │   │   └── llm-adapter.js       # Gemini→Groq→Local fallback
-│   │   │
-│   │   ├── routes/
-│   │   │   ├── shield.js            # NEW: /shield/* endpoints
-│   │   │   ├── auth.js              # Wallet auth
-│   │   │   ├── records.js           # Record management
-│   │   │   ├── access.js            # Access control
-│   │   │   ├── audit.js             # Audit trail
-│   │   │   └── ai.js                # AI safety checks
-│   │   │
-│   │   └── config/
-│   │       └── contracts.json       # Auto-generated from deployment
-│   │
-│   ├── scripts/
-│   │   └── deploy-shield.js         # Contract deployment
-│   │
-│   └── test/
-│       ├── AccessRegistry.test.js   # 38 contract tests
-│       ├── ai-guard.test.js         # 40+ AI tests
-│       └── attacks/                 # NEW: Attack demonstrations
-│           ├── stolen-cid.test.js
-│           ├── expired-grant.test.js
-│           ├── replay.test.js
-│           ├── forged-grant.test.js
-│           └── injection.test.js
-│
-├── medichain-main/medichain-main/
-│   ├── app/
-│   │   ├── page.tsx                 # Main UI (unchanged)
-│   │   ├── dashboard/page.tsx       # Dashboard (unchanged)
-│   │   ├── layout.tsx               # App layout
-│   │   └── globals.css              # Tailwind styles
-│   │
-│   ├── lib/
-│   │   ├── crypto/                  # NEW: Cryptographic engine
-│   │   │   ├── index.ts             # Main exports
-│   │   │   ├── keyDerivation.ts     # HKDF-SHA256 + X25519
-│   │   │   ├── aesGcm.ts            # AES-256-GCM encryption
-│   │   │   ├── keyWrap.ts           # libsodium key wrapping
-│   │   │   └── crypto.test.ts       # 36 tests
-│   │   │
-│   │   ├── shield-client/           # NEW: API clients
-│   │   │   ├── types.ts             # TypeScript definitions
-│   │   │   ├── shieldApi.ts         # REST API client
-│   │   │   ├── registryContract.ts  # Contract client
-│   │   │   └── index.ts
-│   │   │
-│   │   ├── hooks/                   # NEW: Headless React hooks
-│   │   │   ├── useShieldKeys.ts     # In-memory key management
-│   │   │   ├── useShieldGrants.ts   # Access control
-│   │   │   ├── useShieldAudit.ts    # Event querying
-│   │   │   └── useShieldAI.ts       # AI safety analysis
-│   │   │
-│   │   ├── config/
-│   │   │   └── contracts.json       # Auto-generated from deployment
-│   │   │
-│   │   ├── api.ts                   # API client (axios)
-│   │   ├── wallet.ts                # Web3 wallet service
-│   │   ├── WalletContext.tsx        # React context
-│   │   ├── useRecords.ts            # Records management
-│   │   └── useAccess.ts             # Access control
-│   │
-│   └── components/ui/               # UI components (unchanged)
-│
-├── README.md                        # This file
-├── MEDICHAIN-SHIELD-COMPLETE.md     # Complete Shield guide
-├── INTEGRATION.md                   # Frontend integration
-├── RUN-DEMOS.md                     # Attack demonstrations
-├── start-dev.ps1                    # Dev startup script
-└── verify-setup.js                  # Setup verification
-```
-
----
-
-## 🛠️ Technology Stack
-
-### Frontend
-- **Next.js 16** with App Router
-- **React 19** with TypeScript
-- **ethers.js 6** - Wallet integration
-- **libsodium-wrappers** - Key wrapping cryptography
-- **Tailwind CSS** - Styling
-
-### Backend
-- **Express** - Node.js server
-- **Solidity** - Smart contracts
-- **Hardhat** - Contract development
-- **ethers.js** - Blockchain interaction
-- **Zod** - Schema validation
-- **Helmet** - Security headers
-- **express-rate-limit** - Rate limiting
-- **pino** - Logging
-
-### Cryptography
-- **Web Crypto API** - AES-256-GCM, HKDF-SHA256
-- **libsodium** - X25519 key exchange, crypto_box_seal
-- **EIP-712** - Typed signature standard
-
-### Storage
-- **IPFS** - Decentralized storage (Kubo local node)
-- **In-Memory** - Development fallback
-- **Filesystem** - Optional adapter
-
-### AI
-- **Google Gemini Free** - Primary LLM (15 RPM, no credit card)
-- **Groq Free** - Secondary fallback (30 RPM)
-- **Local Heuristics** - Tertiary fallback (offline)
-
-### Blockchain
-- **Polygon Amoy** - L2 testnet (low gas)
-- **OpenZeppelin** - Security standards
-- **EIP-712** - Structured signatures
-
----
-
-## 🔐 Security Architecture
-
-### Zero-Knowledge Flow
-
-```
-1. USER INITIATES
-   └─> Wallet signature derives encryption key (client-side)
-
-2. ENCRYPTION
-   └─> Medical record encrypted with AES-256-GCM (client-side)
-   └─> Record key wrapped with recipient's X25519 public key
-
-3. UPLOAD
-   └─> Ciphertext uploaded to IPFS
-   └─> CID stored on-chain with access grant
-   └─> Server NEVER sees plaintext or private keys
-
-4. ACCESS
-   └─> Recipient unwraps record key with their private key
-   └─> Decrypts ciphertext locally
-   └─> Server NEVER involved in decryption
-```
-
-### Security Guarantees
-
-✅ **Client-Side Encryption** - Plaintext never leaves user's browser  
-✅ **Key Derivation** - HKDF-SHA256 from wallet signatures  
-✅ **Authenticated Encryption** - AES-256-GCM prevents tampering  
-✅ **Forward Secrecy** - Each record has unique encryption key  
-✅ **Access Control** - Time-bounded grants with automatic expiry  
-✅ **Replay Protection** - EIP-712 signatures with nonce increment  
-✅ **Prompt Injection Defense** - 3-layer AI guard (deterministic pre-check, delimited context, output validation)  
-✅ **Audit Trail** - Immutable on-chain access logs  
-
-### Attack Resistance (All Blocked)
-
-| Attack Vector | Defense Mechanism | Test Status |
-|--------------|-------------------|-------------|
-| Stolen CID | AES-GCM authentication | ✅ Blocked |
-| Expired Grant | Time-based contract check | ✅ Blocked |
-| Signature Replay | Nonce increment | ✅ Blocked |
-| Forged Grant | Owner-only authorization | ✅ Blocked |
-| Prompt Injection | 3-layer AI guard | ✅ Blocked |
-
-**Proof**: Run `npm run attack:all` to see all attacks fail.
-
----
-
-## 🔧 API Endpoints
-
-### Original Endpoints
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/nonce` | Get nonce for wallet signing |
-| POST | `/api/auth/login` | Verify signature, return JWT |
-| POST | `/api/records` | Upload medical record |
-| GET | `/api/records/mine` | List user's records |
-| GET | `/api/records/:id` | Fetch specific record |
-| POST | `/api/access/grant` | Grant provider access |
-| POST | `/api/access/revoke` | Revoke provider access |
-| GET | `/api/audit/:id` | Get audit trail |
-| POST | `/api/ai/check-conflicts` | AI drug/allergy check |
-
-### Shield Endpoints (NEW)
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/shield/storage/upload` | Upload encrypted ciphertext |
-| GET | `/shield/storage/:cid` | Retrieve ciphertext |
-| POST | `/shield/audit/query` | Query access events |
-| POST | `/shield/ai/analyze` | AI safety analysis with injection defense |
-
----
-
-## 🎓 Integration Example
-
-```typescript
-import { useShieldKeys, useShieldGrants } from "@/lib/hooks";
-import { encryptRecord, wrapKey } from "@/lib/crypto";
-
-function UploadRecordButton() {
-  const { keypair, deriveKeys } = useShieldKeys();
-  const { grantAccess } = useShieldGrants();
-
-  const handleUpload = async () => {
-    // 1. Derive keys from wallet signature
-    if (!keypair) await deriveKeys();
-
-    // 2. Encrypt record (client-side)
-    const plaintext = new TextEncoder().encode("Medical data");
-    const encrypted = await encryptRecord(plaintext, recordId);
-
-    // 3. Upload ciphertext to IPFS
-    const cid = await shieldApi.uploadCiphertext(encrypted.ciphertext);
-
-    // 4. Grant access to doctor (wraps key, stores on-chain)
-    await grantAccess(
-      recordId,
-      doctorAddress,
-      doctorPublicKey,
-      encrypted.recordKey,
-      expiryTimestamp
-    );
-  };
-
-  return <button onClick={handleUpload}>Upload Encrypted Record</button>;
-}
-```
-
-See **[INTEGRATION.md](INTEGRATION.md)** for complete examples.
-
----
-
-## 📊 Project Statistics
-
-### Implementation
-- **Total Files Created**: 45+
-- **Lines of Code**: 15,000+
-- **Languages**: TypeScript, Solidity, JavaScript
-- **Development Time**: ~40 hours
-
-### Testing
-- **Crypto Tests**: 36 (100% coverage)
-- **Contract Tests**: 38 (≥95% coverage)
-- **AI Guard Tests**: 40+
-- **Attack Demos**: 5 (all blocked)
-- **Total Tests**: 131+
-
-### Costs
-- **Development**: $0
-- **LLM Providers**: $0 (free tiers)
-- **Storage**: $0 (local IPFS)
-- **Network**: $0 (testnet gas)
-- **Total**: **$0**
-
----
-
-## 🐛 Troubleshooting
-
-### Backend Won't Start
-```bash
-# Check dependencies
-cd medichain-backend/server
-npm install
-
-# Verify .env file exists
-ls .env
-
-# Check port availability
-netstat -ano | findstr :4000
-```
-
-### Frontend Won't Build
-```bash
-# Install pnpm if needed
-npm install -g pnpm
-
-# Install dependencies
-cd medichain-main/medichain-main
-pnpm install
-
-# Clear cache and rebuild
-rm -rf .next
+# Build check
 pnpm build
 ```
 
-### Tests Failing
-```bash
-# Crypto tests need libsodium
-cd medichain-main/medichain-main
-pnpm add -D libsodium-wrappers
+**Test summary:**
+- Frontend crypto: **36/36 passing** (AES-256-GCM, X25519, HKDF-SHA256, sealed box)
+- Contract (AccessRegistry): **38/38 passing** (grant, revoke, auth, EIP-712, replay protection)
+- AI guard: **44/44 passing** (injection corpus, output validation, workflow, benign corpus)
+- Attack demos: **17/17 passing** (visual attack scenario tests)
 
-# Contract tests need Hardhat network
-cd medichain-backend
-npx hardhat node  # In separate terminal
-npm test
+---
+
+## What's Real vs. Demo/Mocked
+
+| Feature | Status | Notes |
+|---|---|---|
+| Client-side AES-256-GCM encryption | Real | WebCrypto API, 36 unit tests passing |
+| X25519 key derivation (HKDF) | Real | libsodium-wrappers |
+| Wallet auth (EIP-191 + JWT) | Real | ethers.verifyMessage + jsonwebtoken |
+| Smart contract (AccessRegistry) | Real | Ethereum Sepolia (deploy required — see Step 1) |
+| On-chain audit trail | Real | Solidity events, queryable via ethers.js |
+| EIP-712 gasless grants | Real | Replay-protected signature delegation |
+| AI guard (3-layer injection defense) | Real | 44/44 tests passing, offline/mocked LLM |
+| IPFS storage | Mock | In-memory when `WEB3_STORAGE_TOKEN` not set — clearly disclosed in-app |
+| AI drug interaction check | Optional | Requires `ANTHROPIC_API_KEY` |
+| In-memory record store | Demo | Production needs Postgres/Redis |
+| Sepolia ETH gas costs | Testnet | Sepolia ETH is free from faucet |
+
+---
+
+## Project Structure
+
+```
+medichain-main/
+├── app/
+│   ├── page.tsx              # Landing page + wallet connect
+│   ├── layout.tsx            # Root layout + WalletProvider
+│   └── dashboard/page.tsx   # Patient dashboard (6 tabs: Overview, Records, Access, Provider, Audit, Security)
+├── lib/
+│   ├── WalletContext.tsx     # Global wallet state
+│   ├── wallet.ts             # MetaMask auth + Sepolia chain switching
+│   ├── api.ts                # Axios client for Express backend
+│   ├── crypto/               # Zero-knowledge crypto engine
+│   │   ├── keyDerivation.ts  # HKDF-SHA256 + X25519
+│   │   ├── aesGcm.ts         # AES-256-GCM encrypt/decrypt
+│   │   ├── keyWrap.ts        # libsodium sealed box wrap/unwrap
+│   │   └── index.ts          # Full encrypt/decrypt flows
+│   ├── shield-client/        # Typed Shield API client
+│   │   └── registryContract.ts  # AccessRegistry contract wrapper
+│   └── config/contracts.ts   # Env-driven contract address + ABI (Sepolia)
+├── medichain-backend/
+│   ├── contracts/
+│   │   └── AccessRegistry.sol  # Main smart contract
+│   ├── hardhat.config.js       # Sepolia + Amoy (secondary) networks
+│   ├── scripts/
+│   │   └── deploy-shield.js    # Hardhat deploy + config auto-generation
+│   ├── test/
+│   │   ├── AccessRegistry.test.js  # 38 contract tests
+│   │   └── ai-guard.test.js        # 44 AI guard tests
+│   └── server/               # Express backend
+│       ├── index.js           # Entry point (port 4000)
+│       ├── routes/            # /api/auth, /shield/*
+│       └── services/          # auth, ipfs (mock-capable), ai-guard
+└── vercel.json               # Vercel deployment config + security headers
 ```
 
-### MetaMask Issues
-- Install/unlock MetaMask extension
-- Switch to Polygon Amoy testnet
-- Get test MATIC from [faucet](https://faucet.polygon.technology/)
-- Clear browser cache and localStorage
-- Refresh page
-
 ---
 
-## 📚 Additional Resources
+## License
 
-### Documentation
-- **Complete Shield Guide**: [MEDICHAIN-SHIELD-COMPLETE.md](MEDICHAIN-SHIELD-COMPLETE.md)
-- **Backend README**: `medichain-backend/README.md`
-- **Frontend README**: `medichain-main/medichain-main/README.md`
-
-### Scripts
-- `start-dev.ps1` - Start both servers (Windows)
-- `verify-setup.js` - Verify installation
-
-### Testing
-- `npm test` - Run contract tests
-- `pnpm test` - Run crypto tests
-- `npm run attack:all` - Run attack demonstrations
-- `npm run test:coverage` - Generate coverage reports
-
----
-
-## 🎯 Production Recommendations
-
-### Before Deploying
-1. ✅ Audit smart contracts (OpenZeppelin or CertiK)
-2. ✅ Migrate to w3up-client for Web3.storage
-3. ✅ Add PostgreSQL/MongoDB for metadata
-4. ✅ Implement Redis for session caching
-5. ✅ Add comprehensive monitoring (Sentry, DataDog)
-6. ✅ Set up CI/CD pipeline
-7. ✅ Implement backup and disaster recovery
-8. ✅ Add HIPAA compliance measures
-9. ✅ Configure production LLM provider (Claude/GPT-4)
-10. ✅ Deploy to mainnet (Polygon PoS)
-
----
-
-## 🏆 Key Achievements
-
-✅ **Zero Visual Changes** - No component modifications  
-✅ **$0 Total Cost** - Free-tier only  
-✅ **Zero-Knowledge** - Server never sees plaintext  
-✅ **Non-Breaking** - Existing code untouched  
-✅ **Production Ready** - Comprehensive tests  
-✅ **Attack Resistant** - 5/5 attacks blocked  
-✅ **Type Safe** - Full TypeScript coverage  
-✅ **Well Documented** - Complete guides  
-
----
-
-## 🤝 Contributing
-
-This project is open source. Feel free to fork, extend, and submit PRs!
-
----
-
-## 📄 License
-
-MIT License - See LICENSE file for details
-
----
-
-## 🙏 Acknowledgments
-
-- Built with [v0.dev](https://v0.dev) for UI components
-- Powered by [Polygon](https://polygon.technology/) for L2 scaling
-- Storage by [IPFS](https://ipfs.tech/) for decentralized files
-- AI by [Google Gemini](https://ai.google.dev/) free tier
-- Cryptography by [libsodium](https://libsodium.gitbook.io/)
-
----
-
-**Ready to get started?** Run `.\start-dev.ps1` or see [MEDICHAIN-SHIELD-COMPLETE.md](MEDICHAIN-SHIELD-COMPLETE.md)
-
+MIT
